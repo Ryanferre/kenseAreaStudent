@@ -1,0 +1,5 @@
+@import "tailwindcss";
+.video-js {
+  border-radius: 10px;
+  overflow: hidden;
+}
