@@ -1,6 +1,6 @@
 import fp from "fastify-plugin";
 import { FastifyPluginAsync } from "fastify";
-import { verifyAccess } from "./verifyacesstoken.js";
+import { authenticateClerck } from "./verifyacesstokenclerk.js";
 
 const authPlugin: FastifyPluginAsync = async (fastify) => {
   fastify.addHook("preHandler", async (request: any, reply: any) => {
@@ -12,6 +12,11 @@ const authPlugin: FastifyPluginAsync = async (fastify) => {
 
     console.log("midlleware chamado com a rota: ", request.url)
 
+    // /verifyacess é a primeira url que essa parte do sistema chama. ela é ignorada pois vai criar o token e verificar o link de entrada(convite)
+    if(request.url.startsWith("/verifyacess")){
+      return
+    }
+
     // ignora qualquer rota do Socket.IO
     if (request.url.startsWith("/socket.io/")) {
       console.log("Handshake do Socket.IO ignorando middleware global");
@@ -22,6 +27,7 @@ const authPlugin: FastifyPluginAsync = async (fastify) => {
     const auth = request.headers?.authorization;
 
     if (!auth?.startsWith("Bearer ")) {
+      console.log("dado não contem a palavra chave: ", request.headers)
       return reply.status(401).send({ error: "Missing service token" });
     }
 
@@ -36,11 +42,13 @@ const authPlugin: FastifyPluginAsync = async (fastify) => {
         return;
       }
 
-      const payload = verifyAccess(token);
-      request.service = payload;
+      
 
-      console.log("resultado de payload:", request.service);
-      return;
+        const payload = await authenticateClerck(token);
+        request.service = payload
+
+        console.log("resultado de payload:", request.service);
+        return;
     } catch {
       return reply.status(403).send({ error: "Invalid service token" });
     }

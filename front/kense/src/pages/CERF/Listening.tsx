@@ -4,6 +4,8 @@ import videojs from "video.js"
 import type { Level } from "./reading";
 import ReactApexChart from "react-apexcharts";
 import { Link } from "react-router-dom";
+import contextsTypeInit from "../../hook/hook";
+import { useContext } from "react";
 
 const ListeningTest= ()=>{
     const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -27,11 +29,76 @@ const ListeningTest= ()=>{
     const [finalLevel, setFinalLevel] = useState<Level>("A1")
     const [progress, setProgress] = useState<number | null>(null)
     const [theFind, setFind]= useState(false)
+    const [LocationTest, setLocation]= useState('')
 
     const startedQuestion = useRef<any | null>(false);
     useEffect(()=>{
         setInit(true)
     }, [])
+
+    useEffect(()=>{
+
+            const data_CRO: any = localStorage.getItem('data_CERF');
+
+            const inJson: any = JSON.parse(data_CRO)
+    
+            //pega o primeiro item com status false
+            const Finditem = inJson.list.findIndex((item: any) => item.status === false);
+
+            //pega o item NA LISTA no qual foi modificado o status para true
+            const recentmodifield= inJson.list.findIndex((item: any) =>  inJson.recentmodifield.index != null && item.element === inJson.recentmodifield.element)
+
+
+            if( Finditem == recentmodifield){
+                console.log("dados recente, comparação: ", Finditem, recentmodifield)
+            }
+
+            //se encontrar algo no recentmodifield
+            if(recentmodifield !== -1){
+                console.log("item que foi modificado: ", inJson.recentmodifield, Finditem, recentmodifield)
+                return
+            }
+    
+            //cria uma nova lista que muda o status do primeiro item que achar para false
+            const listModifield= inJson.list.map((elementItem: any, i: number) => {
+                        if(i === Finditem){
+                            return { ...elementItem, status: true }
+                        }
+    
+                        return elementItem
+                    })
+
+            const IstheEnd= Finditem.element == listModifield[listModifield.length-1].element
+    
+             console.log("dado alterado: ", IstheEnd)
+
+             const list: any= {
+                       list: listModifield,
+                       recentmodifield: {index: Finditem, element: listModifield[Finditem].element, Next: true},
+                       status: IstheEnd == true ? "FINISHED" : inJson.status
+                }
+             localStorage.setItem('data_CERF', JSON.stringify(list));
+
+                if(Finditem !== -1) {
+                    console.log("dadode mudança: ", inJson.list[Finditem])
+                    switch (inJson.list[Finditem].element) {
+                                    case "reading":
+                                        setLocation("/readingtest")
+                                        break;
+                                    case "speaking":
+                                        setLocation("/speaking")
+                                        break;
+                                    case "writing":
+                                        setLocation("/Writing")
+                                        break;
+                                    case "listening":
+                                        setLocation("/listening")
+                                        break;
+                                    default:
+                                        break;
+                    }
+                }
+            }, [])
 
     function pauseVideo(Midia: any){
         if(isPause){
@@ -516,7 +583,7 @@ const ListeningTest= ()=>{
                     {progress && progress == 50 && progress < 70 && "Nice progress! You're evolving fast 👏"}
                     {progress && progress == 100 && "Almost fluent! Keep pushing 💪🔥"}
                 </p>
-                <Link to={'/Writining'}>
+                <Link to={LocationTest}>
                     <button onClick={()=> {setInit(true)}} className="w-max px-6 py-3 text-white rounded-lg hover:cursor-pointer bg-gradient-to-r from-sky-300 to-blue-900 hover:brightness-110 transition">
                         Teste de Writining
                     </button>

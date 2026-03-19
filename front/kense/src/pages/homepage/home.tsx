@@ -1,6 +1,17 @@
 import ApexChartHabilit from "./grafic/graphicHabilit"
 import ProgressChart from "./grafic/graphicProgress"
+import { useUser, useAuth } from "@clerk/clerk-react";
+import { GetList } from "../../functions/getlist"
+import { useEffect, useContext } from "react"
+import contextsTypeInit from "../../hook/hook";
 const Home= ()=>{
+    const {saveListLocation}= useContext(contextsTypeInit)
+    const { getToken } = useAuth();
+    const { user } = useUser();
+    useEffect(()=>{
+        
+    }, [])
+    
     return(
         <section className="w-full h-full py-10 px-10">
             <div className="flex flex-row w-full gap-30">

@@ -11,7 +11,11 @@ import urlspeaking from "./features/routes/routeSpeaking/edpointSpeakint.js";
 import urlsoket from "./features/routes/routerAutSoket/autsoket.js";
 import urllistenig from "./features/routes/routerListening/edpointListening.js"
 import urlWriting from "./features/routes/routerWriting/edpointWriting.js"
+import edpointverifydataacess from "./features/routes/authUser/edpointverifydataacess.js"
+import savedatastudent from "./features/routes/authUser/edpointsaveDataUserInBd.js"
 import { filawritingteste } from "./features/routes/routerWriting/workerListening.js";
+import savelistteste from "./features/routes/authUser/edpointcreateList.js"
+import getlistTest from "./features/routes/authUser/edpointgetListTest.js"
 
 const fastify = Fastify({ logger: true });
 
@@ -21,10 +25,14 @@ await fastify.register(multipart, { limits: { fileSize: 10 * 1024 * 1024 } });
 await fastify.register(authPlugin);
 
 // rotas
-fastify.route(urlspeaking);
-fastify.route(urlsoket);
+fastify.route(urlspeaking)
+fastify.route(urlsoket)
 fastify.route(urllistenig)
 fastify.route(urlWriting)
+fastify.route(edpointverifydataacess)
+fastify.route(savedatastudent)
+fastify.route(savelistteste)
+fastify.route(getlistTest)
 
 // socket.io
 let io: SocketIOServer;

@@ -7,11 +7,12 @@ import FoxTense from "./../../assets/—Pngtree—fox little fox animal pet_1411
 import { Link } from "react-router-dom"
 
 
-const Nav= ()=>{
+const Nav= ({data}: any)=>{
     const StyleList= 'flex flex-row items-center bg-blue-300 rounded-lg hover:bg-white rounded-lg hover:border-[1px] hover:border-[#ededf2] hover:cursor-pointer w-60 h-12'
+    
     return(
         <div className="flex flex-col">
-         <User />
+         <User data={data} />
          <div className="w-max h-max">
              <ul className="flex flex-col p-3 gap-3 border-b-[3px] border-[#ededf2] w-full">
                 <li className={StyleList}>
