@@ -9,6 +9,7 @@ lerna-debug.log*
 
 *.mp4
 *.exe
+public
 
 .env
 node_modules/

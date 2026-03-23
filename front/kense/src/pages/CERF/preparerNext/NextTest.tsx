@@ -8,8 +8,22 @@ export const NextPath= (data: any)=>{
 
             const inJson: any = JSON.parse(data_CRO)
     
-            //pega o primeiro item com status false
+            //pega o primeiro item com status false(pra onde o usuario vai)
             const Finditem = inJson.list.findIndex((item: any) => item.status === false);
+
+            //pega o item NA LISTA no qual foi modificado o status para true
+            const recentmodifield= inJson.list.findIndex((item: any) =>  inJson.recentmodifield.index != null && item.element === inJson.recentmodifield.element)
+
+
+            if( Finditem == recentmodifield){
+                console.log("dados recente, comparação: ", Finditem, recentmodifield)
+            }
+
+            //se encontrar algo no recentmodifield
+            if(recentmodifield !== -1){
+                console.log("item que foi modificado: ", inJson.recentmodifield, Finditem, recentmodifield)
+                return
+            }
     
             //cria uma nova lista que muda o status do primeiro item que achar para false
             const listModifield= inJson.list.map((elementItem: any, i: number) => {
@@ -51,7 +65,7 @@ export const NextPath= (data: any)=>{
                     }
                 }
         setTimeout(()=>{
-
+            
         }, 40000)
     }, [data])
     return(

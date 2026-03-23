@@ -5,11 +5,16 @@ import IconDescrib from "./../../assets/uicons/svg/fi-rr-notes.svg"
 import IconProgress from "./../../assets/uicons/svg/fi-rr-graphic-tablet.svg"
 import FoxTense from "./../../assets/—Pngtree—fox little fox animal pet_14115929.png"
 import { Link } from "react-router-dom"
+import { useContext, useEffect } from "react"
+import contextsTypeInit from "../../hook/hook"
 
 
 const Nav= ({data}: any)=>{
     const StyleList= 'flex flex-row items-center bg-blue-300 rounded-lg hover:bg-white rounded-lg hover:border-[1px] hover:border-[#ededf2] hover:cursor-pointer w-60 h-12'
-    
+    const {saveInformation}= useContext(contextsTypeInit)
+    useEffect(()=>{
+        
+    })
     return(
         <div className="flex flex-col">
          <User data={data} />

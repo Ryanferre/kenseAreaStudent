@@ -6,7 +6,7 @@ import { Howl } from "howler";
 import AudioMessage from "./componetSpeaking/audiofila";
 import AudioPreVialusation from "./componetSpeaking/preViasulation";
 import { Link } from "react-router-dom";
-import contextsTypeInit from "../../hook/hook";
+import foxKense from "../../assets/—Pngtree—fox little fox animal pet_14115929.png"
 
 let socket: Socket;
 
@@ -31,6 +31,7 @@ export default function SpeakingTest() {
   const [messages, setMessages] = useState<any []>([])
   const [AnswerServer, setAswer]= useState< any []>([])
   const [LocationTest, setLocation]= useState('')
+  const [explanation, setExplanation]= useState<boolean>(true)
   const { user } = useUser()
   const API_KEY = import.meta.env.VITE_SERVICE
 
@@ -370,6 +371,48 @@ const torecord= ()=>{
   return (
     <div className="w-full mx-auto">
     <section className="bg-blue-100 flex flex-col items-center h-175 w-full rounded-lg">
+      {explanation === true ? 
+                  <div className="flex flex-col py-4 gap-4 h-140">
+                      <div className="w-max h-max flex flex-row">
+                          <img className="w-15 h-15" src={foxKense} />
+                              <div className="w-130 flex flex-col gap-3 px-7 py-4 rounded-lg h-max bg-[#ededf2]">
+                                  <h1 className="font-bold text-2xl mb-4">🗣️ Como funciona o teste de Speaking</h1>
+                                <p className="mb-2">
+                                  Você entrará em um chat de voz interativo para validarmos sua fluência e pronúncia no inglês.
+                                </p>
+                                <p className="mb-4 text-gray-600 italic">
+                                  Sinta-se em uma conversa real 😌 — o objetivo é medir sua capacidade de comunicação natural.
+                                </p>
+
+                                <h2 className="font-bold text-xl mb-2">🎤 Durante o teste</h2>
+                                <ul className="space-y-3 mb-4">
+                                  <li>
+                                    🔹 <strong>Conversa Evolutiva:</strong> O chat seguirá assuntos específicos, progredindo do nível <strong>A1 ao C2</strong> conforme o diálogo avança.
+                                  </li>
+                                  <li>
+                                    🔹 <strong>Interação por Áudio:</strong> Você ouvirá os enunciados e deverá responder falando, como em uma conversa normal.
+                                  </li>
+                                  <li>
+                                    🔹 <strong>Flexibilidade:</strong> Caso não se sinta confortável com um tópico, você tem a opção de não responder e solicitar o próximo áudio.
+                                  </li>
+                                  <li>
+                                    🔹 <strong>Foco no Aprendizado:</strong> Não se preocupe com erros. Estamos aqui para identificar seus pontos fortes e onde podemos te ajudar a evoluir.
+                                  </li>
+                                </ul>
+
+                                <div className="bg-blue-50 p-4 rounded-lg mb-4">
+                                  <p className="font-medium text-blue-800">✨ Dica: Nada de pegadinhas!</p>
+                                  <p className="text-blue-700">Responda com sinceridade e mantenha a calma. O importante é se expressar. Good luck! 🚀</p>
+                                </div>
+                              </div>
+                      </div>
+                      <div className="flex flex-row justify-center">
+                              <button onClick={()=> {setExplanation(false)}} className="w-max px-6 py-3 text-white rounded-lg hover:cursor-pointer bg-gradient-to-r from-sky-300 to-blue-900 hover:brightness-110 transition">
+                                  Começar
+                              </button>
+                      </div>
+                  </div> :
+          <>
           {pageFind === false ?
           <>
             <div className="w-full px-3 h-155 overflow-y-auto">
@@ -401,12 +444,12 @@ const torecord= ()=>{
           :
           <div>
             <h1>Voce foi muito bem!</h1>
-            <p>importante: infelizmente nao posso lhe entregar uma medida de acerto ou erro. essa informacao sera disponibilizada
-               apos a analise detalhada de seu professor responssavel. Mas nao se preocupe, seu resultado foi muito favoravel
+            <p>Importante: Infelizmente, não posso fornecer uma métrica imediata de acertos e erros. Essa informação será disponibilizada após a análise detalhada do professor responsável. Contudo, não se preocupe: seu desempenho preliminar foi muito favorável.
             </p>
             <Link to={LocationTest}>Proximo</Link>
           </div>
           }
+          </>}
     </section>
     </div>
   )

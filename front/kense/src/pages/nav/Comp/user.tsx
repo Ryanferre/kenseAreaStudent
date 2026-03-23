@@ -1,4 +1,3 @@
-import { SignInButton } from "@clerk/clerk-react";
 import { useUser, useAuth } from "@clerk/clerk-react";
 import axios from "axios";
 import { useEffect, useState, useContext } from "react";
@@ -9,7 +8,7 @@ const User= ({data}: any)=>{
     const { user, isLoaded, isSignedIn } = useUser();
     const [isLoad, setLoad]= useState(false)
     const [dataUser, setData]= useState<any []>(['', '', '', '', ''])
-    const {datacadres}= useContext(contextsTypeInit)
+    const {datacadres, saveInformation}= useContext(contextsTypeInit)
     const [tokenUser, setToken]= useState<string | null>('')
     useEffect(()=>{
         const getTokenUser: any= async ()=>{return await getToken()}
@@ -26,26 +25,49 @@ const User= ({data}: any)=>{
                     const dataCreateStudent: any= {
                                             studentIdreq: idUser, 
                         }
+
+                        if(idUser == undefined){
+                            return
+                        }
     
                         const connect= await axios.post("http://localhost:4000/getlistteste", dataCreateStudent, {
                             headers: {
                                 Authorization: `Bearer ${tokenUser}`, // ⚡ envia o token
                             },
                         })
-    
-                    console.log("resultado da verificação de lista: ", connect)
-                    const arr= connect.data.userlist.listTest.map((element: any)=> {return {element: element, status: false}})
-    
-                    const list: any= {
-                       list: arr,
-                       recentmodifield: {index: null, element: "not_defined", Next: false},
-                       status: connect.data.userlist.status
-                    }
+                    const list= connect.data.userlist.listTest.map((element: any)=> {
+                        let decidPath= ''
+                        switch (element) {
+                                    case "reading":
+                                        decidPath= "/reading"
+                                        break;
+                                    case "speaking":
+                                        decidPath= "/speaking"
+                                        break;
+                                    case "writing":
+                                        decidPath= "/Writing"
+                                        break;
+                                    case "listening":
+                                        decidPath= "/listening"
+                                        break;
+                                    default:
+                                        break;
+                        }
+                        return {element: element, path: decidPath}
+                    })
+
+                //verificar o status da lista
+                if(connect.data.userlist.status == "IN_PROGRESS"){
+                    console.log("IN_PROGRESS")
+                    saveInformation(["Teste de identificação de nível disponivel. clique em 'Identificar nivel'"])
+                }
 
                 localStorage.setItem('data_CERF', JSON.stringify(list));
 
-            if(list != undefined){
+            if(list.length > 0){
                 return true
+            }else{
+                return false
             }
     }
 
@@ -62,7 +84,7 @@ const User= ({data}: any)=>{
 
                     const createStudent: any= async ()=>{
                         const token = tokenUser;
-                        if(user?.id !== undefined && user?.fullName !== undefined && data !== undefined){
+                        if(user?.id !== undefined && user?.fullName !== undefined && data !== undefined && token != undefined){
                             const dataCreateStudent: any= {
                                             
                                                     userID: user?.id,
@@ -73,12 +95,10 @@ const User= ({data}: any)=>{
                                 }
 
                                 const connect= await axios.post("http://localhost:4000/savedatastudent", dataCreateStudent, {
-                            headers: {
-                                Authorization: `Bearer ${token}`, // ⚡ envia o token
-                            },
-                            })
-
-                            console.log("a função foi chamada: ", connect.data)
+                                headers: {
+                                    Authorization: `Bearer ${token}`, // ⚡ envia o token
+                                },
+                                })
 
                             return connect.data.information
                         }
@@ -87,6 +107,9 @@ const User= ({data}: any)=>{
 
                     const acdresList: any= async ()=>{
                         const token = tokenUser;
+                        if(data.teacherId == undefined && data.list == undefined && token == undefined){
+                            return
+                        }
                         const dataCreateStudent: any= {
                                         
                                                 teacherId: data.teacherId,
@@ -98,29 +121,32 @@ const User= ({data}: any)=>{
                             }
 
                             const connect= await axios.post("http://localhost:4000/savelistteste", dataCreateStudent, {
-                        headers: {
-                            Authorization: `Bearer ${token}`, // ⚡ envia o token
-                        },
-                        })
-
-                        console.log("dados enviados: ", connect)
+                            headers: {
+                                Authorization: `Bearer ${token}`, // ⚡ envia o token
+                            },
+                            })
                     }
 
                     if(createStudent){
+                        //usuario sempre vai entrar pelo linkin que foi lhe enviado, se não for undefined(existe lista)
                         if(data.list !== undefined){
+                            //pegue a lista
                             const connectgetListy: any = await GetList(user?.id)
                             console.log("dados do array: ", connectgetListy)
+                            //se retornar true significa que a lista não existe no sistema
                             if(connectgetListy){
+                                //cadastre ela
                                 acdresList()
                             }
                         }
-                    }else{
                     }
                 }
             }
 
             initHome()
-    }, [isLoad, datacadres])
+    }, [isLoad, datacadres, tokenUser])
+
+
     return(
         <section className="flex flex-row mx-auto items-center rounded-lg bg-white rounded-lg border-[1px] border-[#ededf2] cursor-pointer w-60 h-12">
             <div className="flex flex-row items-center gap-3 px-1">

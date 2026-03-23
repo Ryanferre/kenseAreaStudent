@@ -13,8 +13,6 @@ function App() {
   const [auth, setauth]= useState(false)
   const [dataForCadres, setData]= useState<any>({})
 
-  const dataCripto= getQuery.get("data")
-
 
   useEffect(()=>{
     const verifyAcess= async ()=>{
@@ -30,7 +28,7 @@ function App() {
       const className = urlObj.searchParams.get('className')
       const classID = urlObj.searchParams.get('classID')
 
-      if(userTeacher != null && listString != null){
+      if(userTeacher != null || userTeacher != undefined || listString != undefined && listString != null && hashData != undefined){
 
         console.log("dados foram chamados: ")
         const datahash: any= {

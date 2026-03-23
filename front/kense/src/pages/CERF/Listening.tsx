@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import "video.js/dist/video-js.css";
 import videojs from "video.js"
 import type { Level } from "./reading";
@@ -6,6 +6,7 @@ import ReactApexChart from "react-apexcharts";
 import { Link } from "react-router-dom";
 import contextsTypeInit from "../../hook/hook";
 import { useContext } from "react";
+import foxKense from "../../assets/—Pngtree—fox little fox animal pet_14115929.png"
 
 const ListeningTest= ()=>{
     const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -18,7 +19,7 @@ const ListeningTest= ()=>{
                                    C2: 0
                                     })
     let MathNivel= useRef<any>({Nivel: '', correct: 0})
-    const [videoInit, setInit]= useState(false)
+    const [videoInit, setInit]= useState(false)//da start para colocar a url principal no player
     const [question, setQuestion]= useState< any []>([])
     const [Aswer, setAswer]= useState<{ [key: number]: string }>({})
     const [isPause, setPause]= useState(true)
@@ -30,75 +31,19 @@ const ListeningTest= ()=>{
     const [progress, setProgress] = useState<number | null>(null)
     const [theFind, setFind]= useState(false)
     const [LocationTest, setLocation]= useState('')
+    const [explanation, setExplanation]= useState<boolean>(true)
 
     const startedQuestion = useRef<any | null>(false);
     useEffect(()=>{
+        const data_CRO: any = localStorage.getItem('data_CERF');
+
+        const inJson: any = JSON.parse(data_CRO)
+
+        setLocation(inJson[0].path)
         setInit(true)
+
+        console.log("chamou setInit")
     }, [])
-
-    useEffect(()=>{
-
-            const data_CRO: any = localStorage.getItem('data_CERF');
-
-            const inJson: any = JSON.parse(data_CRO)
-    
-            //pega o primeiro item com status false
-            const Finditem = inJson.list.findIndex((item: any) => item.status === false);
-
-            //pega o item NA LISTA no qual foi modificado o status para true
-            const recentmodifield= inJson.list.findIndex((item: any) =>  inJson.recentmodifield.index != null && item.element === inJson.recentmodifield.element)
-
-
-            if( Finditem == recentmodifield){
-                console.log("dados recente, comparação: ", Finditem, recentmodifield)
-            }
-
-            //se encontrar algo no recentmodifield
-            if(recentmodifield !== -1){
-                console.log("item que foi modificado: ", inJson.recentmodifield, Finditem, recentmodifield)
-                return
-            }
-    
-            //cria uma nova lista que muda o status do primeiro item que achar para false
-            const listModifield= inJson.list.map((elementItem: any, i: number) => {
-                        if(i === Finditem){
-                            return { ...elementItem, status: true }
-                        }
-    
-                        return elementItem
-                    })
-
-            const IstheEnd= Finditem.element == listModifield[listModifield.length-1].element
-    
-             console.log("dado alterado: ", IstheEnd)
-
-             const list: any= {
-                       list: listModifield,
-                       recentmodifield: {index: Finditem, element: listModifield[Finditem].element, Next: true},
-                       status: IstheEnd == true ? "FINISHED" : inJson.status
-                }
-             localStorage.setItem('data_CERF', JSON.stringify(list));
-
-                if(Finditem !== -1) {
-                    console.log("dadode mudança: ", inJson.list[Finditem])
-                    switch (inJson.list[Finditem].element) {
-                                    case "reading":
-                                        setLocation("/readingtest")
-                                        break;
-                                    case "speaking":
-                                        setLocation("/speaking")
-                                        break;
-                                    case "writing":
-                                        setLocation("/Writing")
-                                        break;
-                                    case "listening":
-                                        setLocation("/listening")
-                                        break;
-                                    default:
-                                        break;
-                    }
-                }
-            }, [])
 
     function pauseVideo(Midia: any){
         if(isPause){
@@ -192,57 +137,50 @@ const ListeningTest= ()=>{
         }
     }
 
-    useEffect(() => {
-    if (!videoRef.current) return;
+const videoRefCallback = useCallback((node: HTMLVideoElement | null) => {
+    if (node) {
+        // Usa timeout de 0ms para "empurrar" a execução para o próximo ciclo do navegador
+        // garante que o 'node' já esteja devidamente inserido no DOM
+        setTimeout(() => {
+            if (!playerRef.current && node) {
+                
+                const player = videojs(node, {
+                    autoplay: false,
+                    controls: true,
+                    responsive: true,
+                    fluid: true,
+                    sources: [{
+                        src: "/PrincipalVideo.mp4",
+                        type: "video/mp4",
+                    }],
+                });
 
-    if (!playerRef.current) {
-        //objeto que vai ser aplicado no componente do video.js
-        const player= playerRef.current = videojs(videoRef.current, {
-        controls: true,
-        responsive: true,
-        fluid: true,
-        width: 800,
-        height: 450,
-        sources: [
-            {
-            src: "/PrincipalVideo.mp4",
-            type: "video/mp4",
-            },
-        ],
-        });
-        playerRef.current = player;
+                player.on("timeupdate", () => {
+                    // sua função de pausa por nível
+                    pauseVideo(player);
+                });
 
-        console.log("player rodando: ", player)
-        if(player){
-          // progresso
-          player.on("timeupdate", () => {
-             pauseVideo(player)
-            });
-        }
-        
-    }
-
-    return () => {
+                playerRef.current = player;
+            }
+        }, 0);
+    } else {
         if (playerRef.current) {
             playerRef.current.dispose();
             playerRef.current = null;
+            console.log("Player destruído com sucesso");
         }
-    };
-    }, [videoInit]);
+    }
+}, []);
+
+
+
 
     useEffect(()=>{
-        console.log("questionario: ", selected)
 
         if(selected != null){
             setAswer((prev: any)=> ({...prev, ...selected}))
-
-            console.log("answer: ", Aswer)
         }
     }, [selected])
-
-    useEffect(()=>{
-        console.log("respostas: ", Aswer)
-    }, [Aswer])
 
     //adiciona o objeto de resposta
     function answer(option: string, numberQuestion: number) {
@@ -262,8 +200,6 @@ const ListeningTest= ()=>{
                                 src: "/PrincipalVideo.mp4",
                                 type: "video/mp4",
                             });
-
-        console.log("ultima questão: ", ultiQuestion, Aswer)
         switch (ultiQuestion) {
             //bloco 1
             case 1:
@@ -398,7 +334,6 @@ const ListeningTest= ()=>{
 
             //bloco 6
             case 6:
-                console.log("Progress in block: ", scoreCalc.current)
                 if(!Aswer["11"]){
                     setSelected((prev) => ({
                         ...prev,
@@ -445,12 +380,7 @@ const ListeningTest= ()=>{
     useEffect(()=>{
         if(Aswer["1"]){
             setFind(true)
-            console.log("progresso: ", progress)
-        }else{
-            console.log("Aswer no final: ", Aswer)
         }
-
-        console.log("Aswer no final: ", Aswer)
     }, [progress])
 
     useEffect(()=>{
@@ -574,6 +504,34 @@ const ListeningTest= ()=>{
 
     return(
         <section className="bg-blue-100 flex flex-col items-center py-5 gap-4 h-175 w-full rounded-lg">
+        {explanation === true ? 
+            <div className="flex flex-col py-4 gap-4 h-140">
+                <div className="w-max h-max flex flex-row">
+                    <img className="w-15 h-15" src={foxKense} />
+                        <div className="w-130 flex flex-col gap-3 px-7 py-4 rounded-lg h-max bg-[#ededf2]">
+                            <h1 className="font-bold text-2xl mb-4">🎧 Como funciona o teste de Listening</h1>
+                            <p className="mb-2">Você assistirá a um vídeo sem legendas para identificarmos seu nível real de compreensão auditiva.</p>
+                            <p className="mb-4 text-gray-600 italic">Sem pressão 😌 — o objetivo é medir sua evolução natural.</p>
+
+                            <h2 className="font-bold text-xl mb-2">🎬 Durante o teste</h2>
+                            <ul className="space-y-2 mb-4">
+                                <li>🔹 O vídeo será pausado automaticamente após cada nível (de <strong>A1 a C2</strong>).</li>
+                                <li>🔹 Cada trecho possui duas perguntas de múltipla escolha baseada no que você acabou de ouvir.</li>
+                                <li>🔹 Se precisar, você pode repetir o trecho específico antes de responder.</li>
+                                <li>🔹 Não tem problema deixar questões em branco. Estamos aqui para lhe ajudar em suas dificuldades</li>
+                            </ul>
+
+                            <p className="font-medium">Nada de pegadinhas.</p>
+                            <p>Responda com sinceridade e mantenha a calma. Good luck! 🚀</p>
+                        </div>
+                </div>
+                <div className="flex flex-row justify-center">
+                        <button onClick={()=> {setExplanation(false)}} className="w-max px-6 py-3 text-white rounded-lg hover:cursor-pointer bg-gradient-to-r from-sky-300 to-blue-900 hover:brightness-110 transition">
+                            Começar
+                        </button>
+                </div>
+            </div> : 
+        <>
         {theFind ?
             <div className="max-w-xl mx-auto p-6 space-y-6 text-center">
                 <h2 className="text-2xl font-bold">Your English Level</h2>
@@ -594,7 +552,7 @@ const ListeningTest= ()=>{
                 <h1 className="text-[2em]">Assista o video com atenção!</h1>
                 <div style={{position: display[0] != "" ? display[0] : '', left: display[0] != '' ? "20%" : ""}}>
                 <div style={{width: `${display[1]}vmax`, height: `${display[3]}vmax`}} data-vjs-player>
-                    {videoInit ? <video ref={videoRef} className={`video-js vjs-big-play-centered`}/> : ''}
+                    {videoInit == true ? <video ref={videoRefCallback} className={`video-js vjs-big-play-centered`}/> : ''}
                 </div>
                 </div>
                 <div style={{display: display[3] != '' ? display[3] : ''}} className="flex flex-col overflow-scroll h-full gap-4">
@@ -604,7 +562,14 @@ const ListeningTest= ()=>{
                     </div></>)) : ''}
                     <button onClick={()=> returnVideo()} className="w-max px-6 py-3 text-white rounded-lg hover:cursor-pointer bg-gradient-to-r from-sky-300 to-blue-900 hover:brightness-110 transition">{findOurContinue}</button>
                 </div>
+                 <div className="flex flex-row justify-end">
+                        <button onClick={()=> {setExplanation(true)}} className="w-max px-6 py-3 text-white rounded-lg hover:cursor-pointer bg-gradient-to-r from-sky-300 to-blue-900 hover:brightness-110 transition">
+                            Retornar a explicação
+                        </button>
+                </div>
             </>
+         }
+         </>
         }
         </section>
     )

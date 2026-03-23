@@ -20,10 +20,10 @@ export const router = createBrowserRouter([
             element: <Home />,
           },
           {path: 'aplytest', element: <Aplytest />},
-          {path: 'readingtest', element: <ReadingLevelTest />},
+          {path: 'reading', element: <ReadingLevelTest />},
           {path: 'speaking', element: <SpeakingTest />},
           {path: 'listening', element: <ListeningTest />},
-          {path: 'Writing', element: <WritingLevelTest />}
+          {path: 'writing', element: <WritingLevelTest />}
         ],
       },
     ],

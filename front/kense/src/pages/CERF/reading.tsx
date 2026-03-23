@@ -1,8 +1,7 @@
-import { useContext, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import ReactApexChart from "react-apexcharts"
 import foxKense from "../../assets/—Pngtree—fox little fox animal pet_14115929.png"
 import { Link } from "react-router-dom"
-import contextsTypeInit from "../../hook/hook"
 
 export type Level = "A1" | "A2" | "B1" | "B2" | "C1"
 
@@ -77,70 +76,25 @@ export default function ReadingLevelTest() {
   const [progress, setProgress] = useState(0)
   const [initTest, setInit]= useState(false)
   const [LocationTest, setLocation]= useState('')
+  const rampa = window.location.pathname
 
   useEffect(()=>{
-
+  console.log("dado chamado")
             const data_CRO: any = localStorage.getItem('data_CERF');
 
             const inJson: any = JSON.parse(data_CRO)
-    
-            //pega o primeiro item com status false
-            const Finditem = inJson.list.findIndex((item: any) => item.status === false);
-
-            //pega o item NA LISTA no qual foi modificado o status para true
-            const recentmodifield= inJson.list.findIndex((item: any) =>  inJson.recentmodifield.index != null && item.element === inJson.recentmodifield.element)
 
 
-            if( Finditem == recentmodifield){
-                console.log("dados recente, comparação: ", Finditem, recentmodifield)
-            }
+            let Finditem = inJson.findIndex((item: any) => item.path == rampa);
 
-            //se encontrar algo no recentmodifield
-            if(recentmodifield !== -1){
-                console.log("item que foi modificado: ", inJson.recentmodifield, Finditem, recentmodifield)
-                return
-            }
-    
-            //cria uma nova lista que muda o status do primeiro item que achar para false
-            const listModifield= inJson.list.map((elementItem: any, i: number) => {
-                        if(i === Finditem){
-                            return { ...elementItem, status: true }
-                        }
-    
-                        return elementItem
-                    })
+            console.log("encontrando path: ", Finditem)
+            console.log("dado no array: ", inJson)
+            setLocation(inJson[Finditem+1].path)
+  }, [rampa])
 
-            const IstheEnd= Finditem.element == listModifield[listModifield.length-1].element
-    
-             console.log("dado alterado: ", IstheEnd)
-
-             const list: any= {
-                       list: listModifield,
-                       recentmodifield: {index: Finditem, element: listModifield[Finditem].element, Next: true},
-                       status: IstheEnd == true ? "FINISHED" : inJson.status
-                }
-             localStorage.setItem('data_CERF', JSON.stringify(list));
-
-                if(Finditem !== -1) {
-                    console.log("dadode mudança: ", inJson.list[Finditem])
-                    switch (inJson.list[Finditem].element) {
-                                    case "reading":
-                                        setLocation("/readingtest")
-                                        break;
-                                    case "speaking":
-                                        setLocation("/speaking")
-                                        break;
-                                    case "writing":
-                                        setLocation("/Writing")
-                                        break;
-                                    case "listening":
-                                        setLocation("/listening")
-                                        break;
-                                    default:
-                                        break;
-                    }
-                }
-            }, [])
+  useEffect(()=>{
+    console.log("next Path: ", LocationTest)
+  }, [LocationTest])
 
   const question = questions[current]
 
